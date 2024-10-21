@@ -1,0 +1,47 @@
+/* src/App.css */
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    overflow: hidden; /* Prevent scrollbars */
+  }
+  
+  #root {
+    height: 100%;
+    width: 100%;
+  }
+  
+  .canvas-container {
+    height: 100vh;
+    width: 100vw;
+    background: radial-gradient(circle at center, #00a86b, #004242);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .splash-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #1e1e1e;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    transition: opacity 0.5s ease-in-out;
+  }
+  
+  .loading-text h1 {
+    font-size: 2.5rem;
+    margin: 0;
+  }
+  
+  .loading-text p {
+    font-size: 1.5rem;
+    margin-top: 10px;
+  }
+  
