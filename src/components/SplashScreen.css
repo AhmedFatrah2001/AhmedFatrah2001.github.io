@@ -47,7 +47,7 @@
   .loading-text p {
     font-size: 1.2rem;
     margin-top: 10px;
-    color: #bdc3c7; /* Lighter text color */
+    color: #bdc3c7; 
   }
   
   .progress-bar {

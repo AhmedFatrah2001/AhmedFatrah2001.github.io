@@ -4,7 +4,7 @@ import { useGLTF } from '@react-three/drei';
 
 const ComputerModel = () => {
   // Load the GLTF model (adjust the path to match your folder structure)
-  const { scene } = useGLTF('assets/models/scene.gltf');
+  const { scene } = useGLTF('assets/models/computer.gltf');
   
   return <primitive object={scene} scale={0.69} />;
 };
