@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense, useRef } from "react";
 import { Canvas, useThree } from "@react-three/fiber";
 import { OrbitControls, useProgress } from "@react-three/drei";
 import ComputerModel from "./components/ComputerModel";
@@ -12,7 +12,7 @@ import "./App.css";
 
 const initialCameraPosition = { x: -39, y: 36, z: 69 };
 
-// CameraController as before
+// CameraController component
 const CameraController = ({ resetTrigger }) => {
   const { camera, gl } = useThree();
 
@@ -31,7 +31,7 @@ const CameraController = ({ resetTrigger }) => {
   return null;
 };
 
-// ResetCameraButton as before
+// ResetCameraButton component
 const ResetCameraButton = ({ resetCamera }) => (
   <button
     className="reset-camera-btn"
@@ -53,7 +53,7 @@ const ResetCameraButton = ({ resetCamera }) => (
   </button>
 );
 
-// HelpWidgets as before
+// HelpWidgets component
 const HelpWidgets = () => (
   <div
     className="help-widgets"
@@ -88,13 +88,42 @@ const HelpWidgets = () => (
 
 // Main App component
 const App = () => {
-  const { progress } = useProgress(); // Get loading progress
+  const { progress } = useProgress(); // Removed unused variables to fix eslint warnings
   const [loading, setLoading] = useState(true);
+  const [loadingProgress, setLoadingProgress] = useState(0);
   const [resetTrigger, setResetTrigger] = useState(false);
+  const progressTimerRef = useRef(null);
 
+  // Handle progress updates with smooth animation
+  useEffect(() => {
+    if (progressTimerRef.current) clearInterval(progressTimerRef.current);
+    
+    if (progress > loadingProgress) {
+      progressTimerRef.current = setInterval(() => {
+        setLoadingProgress(prev => {
+          const next = Math.min(prev + 1, progress);
+          if (next >= progress) {
+            clearInterval(progressTimerRef.current);
+          }
+          return next;
+        });
+      }, 30);
+    } else {
+      setLoadingProgress(progress);
+    }
+    
+    return () => {
+      if (progressTimerRef.current) clearInterval(progressTimerRef.current);
+    };
+  }, [progress, loadingProgress]);
+
+  // Handle loading completion
   useEffect(() => {
     if (progress === 100) {
-      setTimeout(() => setLoading(false), 500); // Delay to smooth transition
+      setLoadingProgress(100);
+      
+      const timeout = setTimeout(() => setLoading(false), 1000);
+      return () => clearTimeout(timeout);
     }
   }, [progress]);
 
@@ -104,8 +133,8 @@ const App = () => {
 
   return (
     <>
-      {loading && <SplashScreen loadingProgress={progress} />}
-
+      {loading && <SplashScreen loadingProgress={loadingProgress} />}
+  
       <Canvas
         className="canvas-container"
         shadows
@@ -121,39 +150,42 @@ const App = () => {
       >
         <ambientLight intensity={0.5} />
         <directionalLight position={[5, 5, 5]} intensity={1} castShadow />
-        <ComputerModel />
-        <PenguinModel position={[-24, 0.2, 0]} scale={3} />
-        <Nes position={[36, 0.4, 16]} scale={2} />;
-        <PaperModel
-          position={[16, 0.35, 15]}
-          rotationZ={8} 
-          scale={69}
-          textureUrl="assets/models/textures/pad.jpg" 
-        />
-        <PaperModel
-          position={[-65, 0.35, 15]}
-          rotationZ={6} 
-          scale={54}
-          textureUrl="assets/models/textures/page1.jpg" 
-        />
-        <PaperModel
-          position={[-48, 0.35, 10]}
-          rotationZ={0.2} 
-          scale={54}
-          textureUrl="assets/models/textures/page2.jpg" 
-        />
-        <PaperModel
-          position={[-81, 0.35, 13]}
-          rotationZ={-0.05} 
-          scale={54}
-          textureUrl="assets/models/textures/page3.jpg" 
-        />
-        <TableModel position={[-20, -41.8, -10]} scale={[8, 8, 8]} />
-
+        
+        <Suspense fallback={null}>
+          <ComputerModel />
+          <PenguinModel position={[-24, 0.2, 0]} scale={3} />
+          <Nes position={[36, 0.4, 16]} scale={2} />
+          <PaperModel
+            position={[16, 0.35, 15]}
+            rotationZ={8} 
+            scale={69}
+            textureUrl="assets/models/textures/pad.jpg" 
+          />
+          <PaperModel
+            position={[-65, 0.35, 15]}
+            rotationZ={6} 
+            scale={54}
+            textureUrl="assets/models/textures/page1.jpg" 
+          />
+          <PaperModel
+            position={[-48, 0.35, 10]}
+            rotationZ={0.2} 
+            scale={54}
+            textureUrl="assets/models/textures/page2.jpg" 
+          />
+          <PaperModel
+            position={[-81, 0.35, 13]}
+            rotationZ={-0.05} 
+            scale={54}
+            textureUrl="assets/models/textures/page3.jpg" 
+          />
+          <TableModel position={[-20, -41.8, -10]} scale={[8, 8, 8]} />
+        </Suspense>
+  
         <OrbitControls enableZoom={true} minDistance={5} maxDistance={140} />
         <CameraController resetTrigger={resetTrigger} />
       </Canvas>
-
+  
       <ResetCameraButton resetCamera={resetCamera} />
       <HelpWidgets />
     </>
